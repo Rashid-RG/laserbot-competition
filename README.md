@@ -1,120 +1,121 @@
-# 🤖 LaserBot Competition Landing & Portal
+# 🤖 LaserBot Apex-1: Competitor Robot Platform
 
-[![Deploy to GitHub Pages](https://github.com/your-username/laserbot-competition/actions/workflows/deploy.yml/badge.svg)](https://github.com/your-username/laserbot-competition/actions/workflows/deploy.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT)
-[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
-[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
-[![JS](https://img.shields.io/badge/Vanilla_JS-ES6+-F7DF1E?style=flat&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](LICENSE)
+[![Platform: ESP32](https://img.shields.io/badge/Platform-ESP32-blue.svg)](https://www.espressif.com/en/products/socs/esp32)
+[![Vision: OpenCV](https://img.shields.io/badge/Vision-OpenCV_4.8-green.svg)](https://opencv.org/)
+[![Control: Web Serial](https://img.shields.io/badge/Control-Web_Serial_API-orange.svg)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API)
 
-> An immersive, feature-rich web portal and physics-based simulator for the **LaserBot Competition**, organized by the **Faculty Career Guidance Cell - FAS, Department of Physical Science**. 
-> 
-> *Target the opponent's tower and activate the target in the shortest possible time!*
+Welcome to the official repository for **LaserBot Apex-1**—a custom-engineered target tracking and autonomous aiming mobile robot built for the **LaserBot Competition (July 24, 2026)**.
 
----
-
-## 🎯 Project Overview
-
-This repository hosts a premium single-page web application (SPA) tailored for the **LaserBot Competition (July 24, 2026)**. The portal is engineered to provide students with a fully functional event information guide, an interactive 2D canvas laser aiming simulator, a real-time leaderboard, a validation-backed registration form, and a dedicated administrator dashboard.
-
-### 🌟 Key Features
-
-1. **🛸 Interactive LaserBot Simulator**
-   - Built on HTML5 Canvas with custom particle systems, laser raycasting, and boundary reflection physics.
-   - Real-time turret orientation controls (angle and laser power adjustments).
-   - Collision detection against animated target hitboxes on a castle tower.
-   - High-score hook integrated directly into the event's Leaderboard database.
-
-2. **📋 Smart Team Registration & Entry Pass Generator**
-   - Support for individual or team registration (up to 5 members).
-   - Real-time frontend validation for emails, phone numbers, and member configurations.
-   - Generates a **LaserBot Entry Pass** complete with a visual QR code and barcode, ready to print or save.
-
-3. **🏆 Leaderboard Hub**
-   - Real-time rank board tracking the fastest times.
-   - Live search filters to find specific teams or institutions.
-
-4. **⚙️ Administrator Control Panel**
-   - Secure review of team registration status (Approve/Reject controls).
-   - Manual overrides to add, modify, or remove leaderboard times.
-   - Local database export options (direct download as JSON or CSV formats).
-
-5. **🕒 Event Countdown**
-   - Live ticker counting down to the competition date: **July 24, 2026**.
+This repository contains the complete firmware, computer vision code, web control dashboard telemetry HUD, and hardware connection schematics required to construct and run the robot.
 
 ---
 
-## 🛠️ Technology Stack
+## 📐 System Architecture
 
-- **Structure**: Semantic HTML5 markup
-- **Styling**: Vanilla CSS3 (CSS Variables, Flexbox/Grid, Glassmorphic overlays, keyframe animations)
-- **Scripting & Canvas**: Vanilla JavaScript (ES6+), Canvas API
-- **Deployment**: Automatic GitHub Actions workflow (`deploy.yml`) for publishing to GitHub Pages.
+Apex-1 integrates three primary software and hardware components to acquire targets and navigate:
 
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-You only need a modern web browser to run this project. No external node servers or dependencies are required, making it lightweight and highly portable.
-
-### Local Development
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/your-username/laserbot-competition.git
-   ```
-2. Navigate into the project folder:
-   ```bash
-   cd laserbot-competition
-   ```
-3. Open `index.html` in your browser, or spin up a local development server:
-   - Using Python:
-     ```bash
-     python -m http.server 8000
-     ```
-   - Using Node (npx):
-     ```bash
-     npx live-server
-     ```
-
----
-
-## 📂 Codebase Structure
-
-```
-laserbot-competition/
-├── .github/
-│   └── workflows/
-│       └── deploy.yml       # GitHub Actions deploy configuration
-├── css/
-│   └── style.css            # Responsive layout styles, animations, variables
-├── js/
-│   ├── app.js               # Main SPA state controller and registration handlers
-│   ├── simulator.js         # Canvas physics-based LaserBot turret gameplay
-│   └── admin.js             # Team lists and admin metrics database operations
-├── index.html               # Main single page entry point
-├── LICENSE                  # MIT License
-└── README.md                # Project documentation
+```mermaid
+graph TD
+    A[Webcam / USB Camera] -->|Frames| B[Laptop: OpenCV Python Script]
+    B -->|Calculates Centroid Offset| B
+    B -->|Serial: Servo Angles + Laser Control| C[ESP32 Microcontroller]
+    C -->|Locomotion| D[L298N Motor Driver]
+    C -->|Turret Pan & Tilt| E[SG90 Servos]
+    C -->|Laser Signal| F[BC547 Switch -> 5V Laser]
+    G[Web HUD Controller] -.->|Web Serial Control WASD| C
 ```
 
 ---
 
-## 🎨 Theme & Styling System
+## 🛠️ Hardware Requirements (BOM)
 
-The application features a sleek **Cyber-Slate Red** aesthetics system matching the event poster:
-- Primary Color: `#ff3333` (Laser Red)
-- Secondary Glow: `rgba(255, 51, 51, 0.45)`
-- Dark Base: `#0c0f12` (Slate Black)
-- Card Accents: `#171c24` with glassmorphic borders.
+To construct this robot, you will need the following physical items:
+
+| Qty | Component Name | Description | Purpose |
+| :---: | :--- | :--- | :--- |
+| **1** | **ESP32 DevKit v1 (30-pin)** | Main microcontroller board with Wi-Fi & Dual Core. | Robot brain & Serial Parser |
+| **1** | **L298N Motor Driver Module** | H-Bridge driver for dual DC motors. | Chassis locomotion |
+| **1** | **2WD Smart Car Chassis Kit** | Includes acrylic base plate, 2 DC motors, wheels, and front caster. | Robot body base |
+| **2** | **SG90 9g Micro Servos** | Standard positional feedback micro servos. | Pan & Tilt turret actuation |
+| **1** | **Pan-Tilt Turret Mount** | 2-Axis nylon or 3D-printed servo bracket. | Holds the laser and servos |
+| **1** | **5V Red Laser Diode Module** | Class 2 low-power laser emitter (<1mW). | Target pointer |
+| **1** | **BC547 NPN Transistor** | Standard transistor used to switch the laser. | Transistor driver switch |
+| **1** | **220Ω Resistor** | Limits current from the ESP32 pin to the transistor. | Safety current limiter |
+| **2** | **18650 Li-ion Batteries** | Rechargable 3.7V batteries (wired in series for 7.4V). | Main power source |
+| **1** | **18650 Dual Battery Case** | Holder with red/black lead wires. | Battery holder |
+| **1** | **Solderless Breadboard & Wires** | Jumper cables (Male-to-Male and Female-to-Male). | Circuit hookups |
 
 ---
 
-## 📄 License
+## 🔌 Electrical Connections (Schematic)
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Connect the hardware components together according to the following wiring configuration:
+
+| From Component | Pin Name | To Component | Pin Name | Notes |
+| :--- | :---: | :--- | :---: | :--- |
+| **Battery (+)** | 7.4V (+) | **L298N Driver** | 12V Terminal | Main power input |
+| **Battery (-)** | GND (-) | **L298N Driver** | GND Terminal | Common system ground |
+| **L298N Driver** | GND Terminal | **ESP32** | GND | Common reference |
+| **L298N Driver** | 5V Out | **ESP32** | Vin | Powers ESP32 board |
+| **L298N Driver** | 5V Out | **Both Servos** | Red (+) Wires | Powers servo motors |
+| **ESP32** | GPIO 12 | **L298N Driver** | IN1 | Left Motor Forward |
+| **ESP32** | GPIO 13 | **L298N Driver** | IN2 | Left Motor Backward |
+| **ESP32** | GPIO 14 | **L298N Driver** | IN3 | Right Motor Forward |
+| **ESP32** | GPIO 27 | **L298N Driver** | IN4 | Right Motor Backward |
+| **ESP32** | GPIO 19 | **SG90 Pan Servo** | Yellow (PWM) | Turret horizontal sweep |
+| **ESP32** | GPIO 18 | **SG90 Tilt Servo** | Yellow (PWM) | Turret vertical pitch |
+| **ESP32** | GPIO 23 | **220Ω Resistor** | Pin 1 | Laser control signal |
+| **220Ω Resistor** | Pin 2 | **BC547 Transistor**| Base (B) pin | Transistor trigger input |
+| **BC547** | Collector (C) | **Laser Module (+)** | Red wire | Laser power switch line |
+| **BC547** | Emitter (E) | **GND** | GND | Transistor ground |
+| **Laser Module** | Black wire (-) | **GND** | GND | Common ground |
 
 ---
 
-## 🤝 Organizer Information
-**Faculty Career Guidance Cell - FAS**  
-*Department of Physical Science*  
-*Registration Date: 24 July 2026*
+## 🚀 Step-by-Step Software Setup
+
+Follow these steps to upload the code and start running your robot:
+
+### Step 1: Upload the ESP32 Firmware
+1. Open the [Arduino IDE](https://www.arduino.cc/en/software).
+2. Go to **File** → **Preferences** and paste this URL into the *Additional Boards Manager URLs* box:
+   `https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json`
+3. Go to **Tools** → **Board** → **Boards Manager**, search for `esp32` (by Espressif), and click **Install**.
+4. Install the servo driver library: Go to **Sketch** → **Include Library** → **Manage Libraries**, search for `ESP32Servo`, and click **Install**.
+5. Connect your ESP32 board to your computer using a micro-USB cable.
+6. Open the file [firmware/firmware.ino](firmware/firmware.ino) in Arduino IDE.
+7. Go to **Tools** → **Board** and select your ESP32 model (e.g. *ESP32 Dev Module*).
+8. Go to **Tools** → **Port** and select your COM Port.
+9. Click **Upload** (the right-pointing arrow icon).
+
+---
+
+### Step 2: Set Up Computer Vision (Auto-Aiming)
+1. Install [Python](https://www.python.org/downloads/) on your computer. *(Make sure to check "Add Python to PATH" during installation).*
+2. Plug a USB webcam into your laptop.
+3. Open a Command Prompt or Terminal, and navigate to the project's vision directory:
+   ```bash
+   cd C:\Users\DELL\.gemini\antigravity-ide\scratch\laserbot-competition\vision
+   ```
+4. Install required libraries:
+   ```bash
+   pip install -r requirements.txt
+   ```
+5. Run the tracker:
+   ```bash
+   python auto_aim.py
+   ```
+   *Your camera stream will open. Place a red target in the frame, and the script will lock on it and send rotation commands directly to your ESP32 turret.*
+
+---
+
+### Step 3: Run the Web HUD Remote Controller
+If you want to manually test your robot, drive it, or calibrate servos using WASD keys:
+1. Double-click the file [index.html](index.html) at the root folder to open the dashboard redirect, or directly open [web-control/index.html](web-control/index.html) in Google Chrome or Microsoft Edge.
+2. Click **Connect Robot Serial Port** in the top navigation bar.
+3. Select your ESP32 board's COM port from the browser window and click **Connect**.
+4. **Controls**:
+   - Drive: Use **W, A, S, D keys** on your keyboard (Hold to move, release to stop).
+   - Aim: Adjust the sliders on the screen, or use the **Arrow keys**.
+   - Laser: Press and hold the **Spacebar** to shoot the laser, or click the **EMIT LASER** button.
