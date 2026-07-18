@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LaserBot Apex-1 Dashboard - Competitor Control Hub. Web Serial telemetry interface, target simulator, and hardware configurations.">
+  <title>LaserBot Apex-1 | Control Room & Telemetry</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Particle Background -->
+  <div id="particles-container"></div>
+  
+  <!-- Global Laser Glow Background -->
+  <div class="laser-bg-glow"></div>
+
+  <!-- Header & Navigation -->
+  <header>
+    <div class="header-container">
+      <div class="logo" onclick="app.navigateTo('home')">
+        <span class="logo-text">APEX<span class="logo-highlight">1</span></span>
+        <div class="logo-target-icon">
+          <div class="target-ring"></div>
+          <div class="target-dot"></div>
+        </div>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="#home" class="nav-link active" onclick="app.navigateTo('home')"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+          <li><a href="#control" class="nav-link" onclick="app.navigateTo('control')"><i class="fa-solid fa-gamepad"></i> Remote HUD</a></li>
+          <li><a href="#hardware" class="nav-link" onclick="app.navigateTo('hardware')"><i class="fa-solid fa-microchip"></i> Hardware specs</a></li>
+          <li><a href="#register" class="nav-link" onclick="app.navigateTo('register')"><i class="fa-solid fa-id-card"></i> Entry Pass</a></li>
+          <li><a href="#admin" class="nav-link" onclick="app.navigateTo('admin')"><i class="fa-solid fa-sliders"></i> Admin Overrides</a></li>
+        </ul>
+      </nav>
+      <!-- Telemetry Quick Indicator -->
+      <div class="header-serial-status offline" id="serial-status-indicator">
+        <span class="status-dot"></span>
+        <span class="status-text">ROBOT OFFLINE</span>
+      </div>
+      <div class="nav-toggle" id="nav-toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Container (Toasts) -->
+  <div id="toast-container"></div>
+
+  <!-- Main Content Wrappers -->
+  <main>
+    
+    <!-- 1. DASHBOARD VIEW (HOME) -->
+    <section id="view-home" class="view-section active">
+      <div class="hero-section">
+        <div class="hero-badge">LASERBOT APEX-1 COMPETITOR CORE</div>
+        <h1 class="hero-title">LASER<span class="text-glow-red">BOT</span><br><span class="title-sub">APEX-1</span></h1>
+        <p class="hero-tagline">DESIGN. AIM. CONQUER.</p>
+        <p class="hero-description">
+          A premium open-source competitor repository built for the **LaserBot Competition (July 24, 2026)**. 
+          Combines ESP32 non-blocking firmware, Python OpenCV target acquisition, and a Web Serial remote telemetry interface.
+        </p>
+
+        <!-- Connection CTA -->
+        <div class="countdown-container dashboard-cta">
+          <div class="countdown-title">HARDWARE TELEMETRY INTERFACE</div>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+            Connect your laptop directly to the LaserBot hardware over Web Serial API to monitor telemetry and drive.
+          </p>
+          <button class="btn btn-primary btn-block glow-on-hover" onclick="app.connectSerial()">
+            <i class="fa-solid fa-plug"></i> Connect Robot Serial Port
+          </button>
+        </div>
+
+        <div class="hero-actions">
+          <button class="btn btn-secondary btn-lg" onclick="app.navigateTo('control')">
+            <i class="fa-solid fa-gamepad"></i> Open Remote Control HUD
+          </button>
+          <button class="btn btn-secondary btn-lg" onclick="app.navigateTo('hardware')">
+            <i class="fa-solid fa-book"></i> Read Wiring Schematics
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Info Grid -->
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-icon"><i class="fa-solid fa-code"></i></div>
+          <h3>FIRMWARE ENGINE</h3>
+          <p class="info-val">ESP32 / C++</p>
+          <span class="info-note">Non-blocking, 115200 Baud command parser</span>
+        </div>
+        
+        <div class="info-card">
+          <div class="info-icon"><i class="fa-solid fa-eye"></i></div>
+          <h3>VISION SYSTEM</h3>
+          <p class="info-val">OpenCV 4.8</p>
+          <span class="info-note">Proportional PID loop target locking</span>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon"><i class="fa-solid fa-diagram-project"></i></div>
+          <h3>INTERACTION HUB</h3>
+          <p class="info-val">Web Serial</p>
+          <span class="info-note">HTML5 direct serial link, no host needed</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. REMOTE CONTROL HUD -->
+    <section id="view-control" class="view-section">
+      <div class="section-header">
+        <h2>REMOTE CONTROL <span class="text-glow-red">HUD</span></h2>
+        <p>Live steering controls, turret aiming mechanics, and serial transmitter logs</p>
+      </div>
+
+      <div class="simulator-layout">
+        <!-- Interactive Canvas / Telemetry Screen -->
+        <div class="canvas-container">
+          <canvas id="simulator-canvas" width="800" height="400"></canvas>
+          <div class="canvas-overlay" id="simulator-overlay">
+            <div class="overlay-content">
+              <h3>OFFLINE SIMULATOR ACTIVE</h3>
+              <p>Aiming calibration sandbox. Click below to begin calibration. (Web Serial commands are bypassed during sandbox runs).</p>
+              <button class="btn btn-primary" onclick="simulator.startChallenge()">Start Calibration Match</button>
+            </div>
+          </div>
+          
+          <!-- Telemetry Overlays -->
+          <div class="simulator-hud">
+            <div class="hud-item">
+              <span class="hud-label">PAN</span>
+              <span class="hud-val" id="telemetry-pan">90°</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-label">TILT</span>
+              <span class="hud-val" id="telemetry-tilt">90°</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-label">LASER</span>
+              <span class="hud-val" id="telemetry-laser">OFF</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Steering Controllers -->
+        <div class="controls-panel">
+          <div class="control-tab-header">
+            <h3>Control Room</h3>
+            <span class="badge" id="hud-connection-badge">OFFLINE</span>
+          </div>
+
+          <div class="control-group">
+            <label for="control-angle">Aim Yaw (Pan Servo): <span id="val-angle">90°</span></label>
+            <input type="range" id="control-angle" min="0" max="180" value="90" oninput="app.updateAnglesFromSliders()">
+          </div>
+          
+          <div class="control-group">
+            <label for="control-power">Aim Pitch (Tilt Servo): <span id="val-power">90°</span></label>
+            <input type="range" id="control-power" min="0" max="180" value="90" oninput="app.updateAnglesFromSliders()">
+          </div>
+
+          <div class="hud-divider"></div>
+
+          <!-- Movement Buttons -->
+          <div class="steering-keyboard-layout">
+            <span class="kbd-label">CHASSIS LOCOMOTION</span>
+            <div class="kbd-grid">
+              <div></div>
+              <div class="kbd-key" id="key-w" data-dir="forward"><i class="fa-solid fa-caret-up"></i><span>W</span></div>
+              <div></div>
+              <div class="kbd-key" id="key-a" data-dir="left"><i class="fa-solid fa-caret-left"></i><span>A</span></div>
+              <div class="kbd-key" id="key-s" data-dir="backward"><i class="fa-solid fa-caret-down"></i><span>S</span></div>
+              <div class="kbd-key" id="key-d" data-dir="right"><i class="fa-solid fa-caret-right"></i><span>D</span></div>
+            </div>
+            <span class="kbd-note">Hold keys to drive, release to stop.</span>
+          </div>
+
+          <button id="btn-fire" class="btn btn-danger btn-lg btn-fire-laser" onmousedown="app.laserTrigger(true)" onmouseup="app.laserTrigger(false)">
+            <span class="fire-normal"><i class="fa-solid fa-bolt"></i> EMIT LASER (Spacebar)</span>
+            <span class="fire-active"><i class="fa-solid fa-radiation fa-fade"></i> LASER ON</span>
+          </button>
+          
+          <!-- Terminal Logs -->
+          <div class="serial-terminal">
+            <div class="terminal-header">
+              <span>Serial Transmitter Logs</span>
+              <button onclick="app.clearTerminal()">Clear</button>
+            </div>
+            <div class="terminal-body" id="serial-terminal-logs">
+              [SYSTEM] Web Serial API ready. Connect device to see packet logs...
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. HARDWARE REFERENCE -->
+    <section id="view-hardware" class="view-section">
+      <div class="section-header">
+        <h2>HARDWARE <span class="text-glow-red">SPECIFICATIONS</span></h2>
+        <p>BOM parts list, connection mapping, and electrical layout</p>
+      </div>
+
+      <div class="tab-content active" style="background: var(--bg-card); padding: 2.5rem;">
+        <div class="hardware-grid-layout">
+          <div>
+            <h3>Bill of Materials (BOM)</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+              Required parts to construct the LaserBot Apex-1 mobile target aim robot.
+            </p>
+            <ul class="spec-list">
+              <li><strong>Microcontroller:</strong> ESP32 DevKit v1 (30 pins).</li>
+              <li><strong>Motor Driver:</strong> L298N H-Bridge Module.</li>
+              <li><strong>Chassis Motors:</strong> 2x DC Gearbox Motors (3-6V) with wheels.</li>
+              <li><strong>Turret Servos:</strong> 2x SG90 9g Micro Servos (Yaw/Pitch).</li>
+              <li><strong>Aiming Module:</strong> 5V Red Laser Diode (<1mW Class 2).</li>
+              <li><strong>Laser Switch:</strong> BC547 NPN Transistor + 220Ω Resistor buffer.</li>
+              <li><strong>Power Pack:</strong> 2x 18650 Li-ion cells (7.4V output).</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Wiring Connections Matrix</h3>
+            <div class="table-container" style="border: 1px solid var(--border-color); background: var(--bg-primary);">
+              <table class="leaderboard-table" style="font-size: 0.85rem;">
+                <thead>
+                  <tr>
+                    <th>ESP32 GPIO Pin</th>
+                    <th>Device</th>
+                    <th>Device Pin</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>GPIO 12</td><td>L298N Driver</td><td>IN1 (Left Fwd)</td></tr>
+                  <tr><td>GPIO 13</td><td>L298N Driver</td><td>IN2 (Left Bwd)</td></tr>
+                  <tr><td>GPIO 14</td><td>L298N Driver</td><td>IN3 (Right Fwd)</td></tr>
+                  <tr><td>GPIO 27</td><td>L298N Driver</td><td>IN4 (Right Bwd)</td></tr>
+                  <tr><td>GPIO 19</td><td>Pan Servo (Yaw)</td><td>Orange/PWM Pin</td></tr>
+                  <tr><td>GPIO 18</td><td>Tilt Servo (Pitch)</td><td>Orange/PWM Pin</td></tr>
+                  <tr><td>GPIO 23</td><td>BC547 Switch</td><td>Resistor Base (Laser Switch)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. ENTRY PASS REGISTRATION -->
+    <section id="view-register" class="view-section">
+      <div class="section-header">
+        <h2>PORTAL <span class="text-glow-red">REGISTRATION PASS</span></h2>
+        <p>Compile team configurations and generate a printable entry ticket badge</p>
+      </div>
+
+      <div class="registration-layout">
+        <!-- Form Container -->
+        <div class="form-container-card">
+          <form id="registration-form" onsubmit="app.handleRegistration(event)">
+            <h3>Team Registration Details</h3>
+            
+            <div class="form-row">
+              <div class="form-control-group">
+                <label for="reg-team-name">Registered Team Name <span class="required">*</span></label>
+                <input type="text" id="reg-team-name" required placeholder="Enter team name">
+              </div>
+              <div class="form-control-group">
+                <label for="reg-institution">Institution / Department <span class="required">*</span></label>
+                <input type="text" id="reg-institution" required placeholder="e.g. Department of Physical Science">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-control-group">
+                <label for="reg-leader-name">Team Leader Full Name <span class="required">*</span></label>
+                <input type="text" id="reg-leader-name" required placeholder="Leader's name">
+              </div>
+              <div class="form-control-group">
+                <label for="reg-leader-email">Leader Email Address <span class="required">*</span></label>
+                <input type="email" id="reg-leader-email" required placeholder="leader@domain.com">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-control-group">
+                <label for="reg-leader-phone">Contact Phone Number <span class="required">*</span></label>
+                <input type="tel" id="reg-leader-phone" required placeholder="e.g. +94 XXXXXXXXX" pattern="[0-9+\s-]{8,15}">
+              </div>
+              <div class="form-control-group">
+                <label for="reg-member-count">Additional Team Members (Max 4)</label>
+                <select id="reg-member-count" onchange="app.renderMemberFields()">
+                  <option value="0">None (Individual Registration)</option>
+                  <option value="1">1 Member</option>
+                  <option value="2">2 Members</option>
+                  <option value="3">3 Members</option>
+                  <option value="4">4 Members</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Dynamic Team Members Container -->
+            <div id="dynamic-members-container"></div>
+
+            <button type="submit" class="btn btn-primary btn-block glow-on-hover mt-3">
+              <i class="fa-solid fa-arrow-right-to-bracket"></i> GENERATE ENTRY PASS TICKET
+            </button>
+          </form>
+        </div>
+
+        <!-- Ticket / Confirmation Sidebar -->
+        <div class="confirmation-sidebar">
+          <div class="ticket-status-box" id="ticket-status-box">
+            <div class="empty-state">
+              <i class="fa-solid fa-ticket-simple"></i>
+              <h4>No Entry Ticket Compiled</h4>
+              <p>Complete the form on the left to compile your LaserBot Competition entry badge.</p>
+            </div>
+            
+            <div class="ticket-wrapper hidden" id="ticket-wrapper">
+              <div class="ticket-card" id="printable-ticket">
+                <div class="ticket-header">
+                  <div class="logo">LASER<span>BOT</span></div>
+                  <div class="badge">COMPETITOR</div>
+                </div>
+                
+                <div class="ticket-body">
+                  <div class="ticket-info-row">
+                    <div class="ticket-field">
+                      <span class="field-label">TEAM ENTRY NAME</span>
+                      <span class="field-val" id="ticket-team-name">APEX AIMERS</span>
+                    </div>
+                    <div class="ticket-field text-right">
+                      <span class="field-label">ROBOT ID</span>
+                      <span class="field-val code-font" id="ticket-id">LB-78923</span>
+                    </div>
+                  </div>
+
+                  <div class="ticket-info-row">
+                    <div class="ticket-field">
+                      <span class="field-label">LEADER / PILOT</span>
+                      <span class="field-val" id="ticket-leader">Jane Doe</span>
+                    </div>
+                    <div class="ticket-field text-right">
+                      <span class="field-label">CREW SIZE</span>
+                      <span class="field-val" id="ticket-members">5 Total</span>
+                    </div>
+                  </div>
+
+                  <div class="ticket-info-row">
+                    <div class="ticket-field">
+                      <span class="field-label">INSTITUTION</span>
+                      <span class="field-val" id="ticket-institution">Physical Science</span>
+                    </div>
+                    <div class="ticket-field text-right">
+                      <span class="field-label">EVENT DATE</span>
+                      <span class="field-val code-font">24-JULY-2026</span>
+                    </div>
+                  </div>
+                  
+                  <div class="ticket-footer">
+                    <div class="ticket-barcode">
+                      <div class="barcode-lines" id="ticket-barcode-lines"></div>
+                      <span class="barcode-text" id="ticket-barcode-text">LB-2026-908123</span>
+                    </div>
+                    <div class="ticket-qrcode">
+                      <div class="qr-grid" id="ticket-qr-grid"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ticket-actions">
+                <button class="btn btn-secondary btn-block" onclick="app.printTicket()"><i class="fa-solid fa-print"></i> Print Ticket Pass</button>
+                <button class="btn btn-danger btn-block" onclick="app.resetRegistration()"><i class="fa-solid fa-trash-can"></i> Reset Ticket</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. ADMIN CONTROLS (LEADERBOARD) -->
+    <section id="view-admin" class="view-section">
+      <div class="section-header">
+        <h2>LEADERBOARD & <span class="text-glow-red">ADMIN OVERRIDES</span></h2>
+        <p>Log calibration run results, filter timings, and export session data</p>
+      </div>
+
+      <div class="admin-grid">
+        <!-- Sidebar Database Controls -->
+        <div class="admin-sidebar-card">
+          <h3>Session Metrics</h3>
+          
+          <div class="db-stats">
+            <div class="stat-card">
+              <span class="stat-num" id="stat-total-teams">0</span>
+              <span class="stat-lbl">Registered Runs</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-num" id="stat-best-time">00.00s</span>
+              <span class="stat-lbl">Record Activation Time</span>
+            </div>
+          </div>
+
+          <div class="admin-action-list">
+            <h4>Export Timings Database</h4>
+            <div class="btn-group-stacked">
+              <button class="btn btn-secondary" onclick="admin.exportJSON()"><i class="fa-solid fa-file-code"></i> Export JSON</button>
+              <button class="btn btn-secondary" onclick="admin.exportCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+            </div>
+
+            <h4 class="mt-4">Leaderboard Controls</h4>
+            <button class="btn btn-danger btn-block" onclick="admin.openScoreModal()"><i class="fa-solid fa-plus"></i> Add Manual Score Run</button>
+            
+            <h4 class="mt-4">Reset Defaults</h4>
+            <button class="btn btn-outline-danger btn-block" onclick="admin.resetSystemData()"><i class="fa-solid fa-power-off"></i> Reset Data</button>
+          </div>
+        </div>
+
+        <!-- Database List -->
+        <div class="admin-main-card">
+          <h3>Logged Run Timings</h3>
+          
+          <div class="admin-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Team Name</th>
+                  <th>Institution / Affiliation</th>
+                  <th>Activation Time</th>
+                  <th>Type</th>
+                  <th style="text-align: right;">Delete</th>
+                </tr>
+              </thead>
+              <tbody id="admin-tbody-registrations">
+                <!-- Loaded dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Score Modal -->
+      <div class="modal-overlay" id="score-modal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h3>Add Custom Score Run</h3>
+            <button class="modal-close" onclick="admin.closeScoreModal()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-control-group">
+              <label for="modal-team-name">Team Name</label>
+              <input type="text" id="modal-team-name" placeholder="Enter team name">
+            </div>
+            <div class="form-control-group">
+              <label for="modal-institution">Institution</label>
+              <input type="text" id="modal-institution" placeholder="e.g. Department of Physical Science">
+            </div>
+            <div class="form-control-group">
+              <label for="modal-run-time">Target Activation Time (seconds)</label>
+              <input type="number" id="modal-run-time" step="0.01" min="1.00" max="600.00" placeholder="e.g. 14.52">
+            </div>
+            <div class="form-control-group">
+              <label for="modal-run-type">Match Run Type</label>
+              <select id="modal-run-type">
+                <option value="verified">Verified Arena Match</option>
+                <option value="simulator">Simulator Training Run</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="admin.closeScoreModal()">Cancel</button>
+            <button class="btn btn-success" onclick="admin.submitCustomScore()">Save Run</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Core Javascript -->
+  <script src="js/app.js"></script>
+  <script src="js/simulator.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
