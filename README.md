@@ -96,7 +96,7 @@ Follow these steps to upload the code and start running your robot:
 2. Plug a USB webcam into your laptop.
 3. Open a Command Prompt or Terminal, and navigate to the project's vision directory:
    ```bash
-   cd C:\Users\DELL\.gemini\antigravity-ide\scratch\laserbot-competition\vision
+   cd vision
    ```
 4. Install required libraries:
    ```bash
