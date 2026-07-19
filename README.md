@@ -1,11 +1,11 @@
-# 🤖 LaserBot Apex-1: Competitor Robot Platform
+# 🤖 LaserBot Apex-1: Target Tracking & Aiming Robot Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](LICENSE)
 [![Platform: ESP32](https://img.shields.io/badge/Platform-ESP32-blue.svg)](https://www.espressif.com/en/products/socs/esp32)
 [![Vision: OpenCV](https://img.shields.io/badge/Vision-OpenCV_4.8-green.svg)](https://opencv.org/)
 [![Control: Web Serial](https://img.shields.io/badge/Control-Web_Serial_API-orange.svg)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API)
 
-Welcome to the official repository for **LaserBot Apex-1**—a custom-engineered target tracking and autonomous aiming mobile robot built for the **LaserBot Competition (July 24, 2026)**.
+Welcome to the official repository for **LaserBot Apex-1**—a custom-engineered target tracking and autonomous aiming mobile robot.
 
 This repository contains the complete firmware, computer vision code, web control dashboard telemetry HUD, and hardware connection schematics required to construct and run the robot.
 
@@ -74,6 +74,12 @@ Connect the hardware components together according to the following wiring confi
 ---
 
 ## 🚀 Step-by-Step Software Setup
+
+First, clone this repository to your computer and navigate into the project folder:
+```bash
+git clone https://github.com/Rashid-RG/laserbot-competition.git
+cd laserbot-competition
+```
 
 Follow these steps to upload the code and start running your robot:
 
